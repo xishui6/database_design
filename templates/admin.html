@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员首页</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: url('/static/images/admin-bg.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+            border-color: #4f46e5;
+        }
+
+        .btn-custom {
+            border-radius: 8px;
+            padding: 0.4rem 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .table th {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #e5e7eb;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: none;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8 overlay">
+            <!-- Welcome Card -->
+            <div class="welcome-card text-center mb-4 p-4">
+                <h1 class="display-6 mb-3">欢迎管理员：{{ username }}</h1>
+                <a href="{{ url_for('logout') }}" class="btn btn-light btn-custom">退出登录</a>
+            </div>
+
+            <!-- 1. 添加设备及入库 -->
+            <div class="mb-5">
+                <h3 class="text-center mb-4 text-primary">添加设备</h3>
+                <form method="post" action="{{ url_for('add_device') }}" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <input type="text" name="device_type" class="form-control" placeholder="设备类型" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" step="0.01" name="device_price" class="form-control" placeholder="设备价格" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" name="stock_quantity" class="form-control" placeholder="入库数量" required>
+                        </div>
+                        <div class="col-md-3 d-grid">
+                            <button type="submit" class="btn btn-success btn-custom">添加</button>
+                        </div>
+                    </div>
+                </form>
+                {% if add_msg %}
+                    <div class="alert alert-info">{{ add_msg }}</div>
+                {% endif %}
+            </div>
+
+            <!-- 2. 查询设备 -->
+            <div class="mb-5">
+                <h3 class="text-center mb-4 text-primary">设备查询</h3>
+                <form method="get" action="{{ url_for('admin_dashboard') }}" class="mb-4">
+                    <div class="row g-3 justify-content-center">
+                        <div class="col-md-5">
+                            <input type="text" name="search_type" class="form-control" placeholder="输入设备类型进行查询">
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button type="submit" class="btn btn-primary btn-custom">查询</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>设备ID</th>
+                                <th>类型</th>
+                                <th>价格</th>
+                                <th>库存现货</th>
+                                <th>借出时间</th>
+                                <th>归还时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for d in devices %}
+                            <tr>
+                                <td>{{ d.device_id }}</td>
+                                <td>{{ d.device_type }}</td>
+                                <td>{{ d.device_price }}</td>
+                                <td>{{ d.stock_quantity }}</td>
+                                <td>{{ d.borrow_time or '-' }}</td>
+                                <td>{{ d.return_time or '-' }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. 统计借还数量 -->
+            <div>
+                <h3 class="text-center mb-4 text-primary">借还统计</h3>
+                <form method="get" action="{{ url_for('device_stat') }}" class="mb-4">
+                    <div class="row g-3 justify-content-center">
+                        <div class="col-md-4">
+                            <input type="datetime-local" name="start_time" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="datetime-local" name="end_time" class="form-control" required>
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button type="submit" class="btn btn-warning btn-custom">统计</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if stat_result %}
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead>
+                            <tr>
+                                <th>设备ID</th>
+                                <th>类型</th>
+                                <th>借出次数</th>
+                                <th>归还次数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for s in stat_result %}
+                            <tr>
+                                <td>{{ s.device_id }}</td>
+                                <td>{{ s.device_type }}</td>
+                                <td>{{ s.borrow_count }}</td>
+                                <td>{{ s.return_count }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

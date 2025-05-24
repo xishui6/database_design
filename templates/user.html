@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户首页</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: url('/static/images/user-bg.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+            border-color: #3b82f6;
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .btn-custom {
+            border-radius: 10px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            border-bottom: 3px solid #bfdbfe;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: #1e40af;
+        }
+
+        .table th {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #e5e7eb;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-row .col {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8 overlay">
+            <div class="welcome-card text-center mb-5">
+                <h1 class="display-6 mb-3">欢迎用户：{{ username }}</h1>
+                <a href="{{ url_for('logout') }}" class="btn btn-light btn-custom fw-bold">退出登录</a>
+            </div>
+            <!-- 1. 查询设备库存 -->
+            <div class="mb-5">
+                <h3 class="text-center mb-4 section-header">设备库存查询</h3>
+                <form method="get" action="{{ url_for('user_dashboard') }}" class="mb-4">
+                    <div class="row g-3 form-row">
+                        <div class="col-md-9">
+                            <input type="text" name="search_type" class="form-control form-control-lg" placeholder="输入设备类型进行查询">
+                        </div>
+                        <div class="col-md-3 d-grid">
+                            <button type="submit" class="btn btn-primary btn-custom btn-lg">查询</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th class="text-nowrap">设备ID</th>
+                                <th>类型</th>
+                                <th>价格</th>
+                                <th>库存现货</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for d in devices %}
+                            <tr>
+                                <td>{{ d.device_id }}</td>
+                                <td>{{ d.device_type }}</td>
+                                <td>{{ d.device_price }}</td>
+                                <td>{{ d.stock_quantity }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- 2. 借出设备 -->
+            <div class="mb-5">
+                <h3 class="text-center mb-4 section-header">借出设备</h3>
+                <form method="post" action="{{ url_for('borrow_device') }}" class="mb-4">
+                    <div class="row g-3 form-row">
+                        <div class="col-md-4">
+                            <input type="number" name="device_id" class="form-control" placeholder="设备ID" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" name="borrow_count" class="form-control" placeholder="借出数量(最多5台)" min="1" max="5" required>
+                        </div>
+                        <div class="col-md-4 d-grid">
+                            <button type="submit" class="btn btn-success btn-custom">借出</button>
+                        </div>
+                    </div>
+                </form>
+                {% if borrow_msg %}
+                    <div class="alert alert-info">{{ borrow_msg }}</div>
+                {% endif %}
+            </div>
+            <!-- 3. 归还设备 -->
+            <div>
+                <h3 class="text-center mb-4 section-header">归还设备</h3>
+                <form method="post" action="{{ url_for('return_device') }}" class="mb-4">
+                    <div class="row g-3 form-row">
+                        <div class="col-md-4">
+                            <input type="number" name="device_id" class="form-control" placeholder="设备ID" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" name="return_count" class="form-control" placeholder="归还数量" min="1" required>
+                        </div>
+                        <div class="col-md-4 d-grid">
+                            <button type="submit" class="btn btn-warning btn-custom">归还</button>
+                        </div>
+                    </div>
+                </form>
+                {% if return_msg %}
+                    <div class="alert alert-info">{{ return_msg }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
