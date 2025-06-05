@@ -1848,11 +1848,8 @@ user
     </script>
 </head>
 <body>
-    <!-- 背景图片层 -->
     <div class="background-layer"></div>
-    <!-- 半透明遮罩层 -->
     <div class="overlay"></div>
-
     <div class="ribbon-bar">
         <button class="ribbon-tab" id="search-tab" onclick="showTab('search')">设备查询</button>
         <button class="ribbon-tab" id="borrow-tab" onclick="showTab('borrow')">借出设备</button>
@@ -1862,17 +1859,19 @@ user
             <a href="{{ url_for('logout') }}" class="btn btn-outline-primary btn-sm ribbon-logout">退出登录</a>
         </div>
     </div>
-
     <div class="ribbon-content position-relative">
         <!-- 设备查询 -->
         <div id="search-section" class="ribbon-section" style="display:none;">
             <h3 class="mb-4 text-primary">设备库存查询</h3>
             <form method="get" action="{{ url_for('user_dashboard') }}" class="mb-4">
                 <div class="row g-3">
-                    <div class="col-md-9">
+                    <div class="col-md-6">
                         <input type="text" name="search_type" class="form-control" placeholder="输入设备类型进行模糊查询">
                     </div>
-                    <div class="col-md-3 d-grid">
+                    <div class="col-md-4">
+                        <input type="text" name="search_model" class="form-control" placeholder="输入设备型号进行模糊查询">
+                    </div>
+                    <div class="col-md-2 d-grid">
                         <button type="submit" class="btn btn-primary">查询</button>
                     </div>
                 </div>
@@ -1883,6 +1882,7 @@ user
                         <tr>
                             <th>设备ID</th>
                             <th>类型</th>
+                            <th>型号</th>
                             <th>价格</th>
                             <th>库存现货</th>
                         </tr>
@@ -1892,6 +1892,7 @@ user
                         <tr>
                             <td>{{ d.device_id }}</td>
                             <td>{{ d.device_type }}</td>
+                            <td>{{ d.device_model }}</td>
                             <td>{{ d.device_price }}</td>
                             <td>{{ d.stock_quantity }}</td>
                         </tr>
@@ -1900,7 +1901,6 @@ user
                 </table>
             </div>
         </div>
-
         <!-- 借出设备 -->
         <div id="borrow-section" class="ribbon-section" style="display:none;">
             <h3 class="mb-4 text-primary">借出设备</h3>
@@ -1921,7 +1921,6 @@ user
                 <div class="alert alert-info">{{ borrow_msg }}</div>
             {% endif %}
         </div>
-
         <!-- 归还设备 -->
         <div id="return-section" class="ribbon-section" style="display:none;">
             <h3 class="mb-4 text-primary">归还设备</h3>
@@ -1944,5 +1943,4 @@ user
         </div>
     </div>
 </body>
-</html>
-'''
+</html>'''
