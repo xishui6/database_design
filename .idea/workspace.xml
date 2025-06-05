@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebfbf49d-727d-48e9-96e5-6839677e0213" name="更改" comment="数据库课设">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/teat.py" beforeDir="false" afterPath="$PROJECT_DIR$/teat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/user.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/user.html" afterDir="false" />
-    </list>
+    <list default="true" id="ebfbf49d-727d-48e9-96e5-6839677e0213" name="更改" comment="数据库课设，更改了页面布局，添加了模糊查询功能和设备类型的具体型号" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -123,17 +117,45 @@
       <option name="project" value="LOCAL" />
       <updated>1748067580947</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="数据库课设，更改了页面布局，添加了模糊查询功能和设备类型的具体型号">
+      <option name="closed" value="true" />
+      <created>1749094844265</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1749094844265</updated>
+    </task>
+    <task id="LOCAL-00003" summary="数据库课设，更改了页面布局，添加了模糊查询功能和设备类型的具体型号">
+      <option name="closed" value="true" />
+      <created>1749095169838</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1749095169838</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="数据库课设" />
-    <option name="LAST_COMMIT_MESSAGE" value="数据库课设" />
+    <MESSAGE value="数据库课设，更改了页面布局，添加了模糊查询功能和设备类型的具体型号" />
+    <option name="LAST_COMMIT_MESSAGE" value="数据库课设，更改了页面布局，添加了模糊查询功能和设备类型的具体型号" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/flaskProject3$flaskProject3.coverage" NAME="flaskProject3 覆盖结果" MODIFIED="1749092466100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/flaskProject3$flaskProject3.coverage" NAME="flaskProject3 覆盖结果" MODIFIED="1749094045447" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
