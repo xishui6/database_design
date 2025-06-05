@@ -90,47 +90,63 @@ def admin_dashboard():
     if 'username' not in session or session.get('role') != 'admin':
         return redirect(url_for('login'))
     search_type = request.args.get('search_type')
+    search_model = request.args.get('search_model')
     add_msg = request.args.get('add_msg')
     db = get_db()
     with db.cursor() as cursor:
+        sql = """
+            SELECT device_id, device_type, device_model, device_price, stock_quantity
+            FROM device
+            WHERE 1=1
+        """
+        params = []
         if search_type:
-            cursor.execute("""
-                SELECT d.device_id, d.device_type, d.device_price, d.stock_quantity,
-                       r.borrow_time, r.return_time
-                FROM device d
-                LEFT JOIN device_record r ON d.device_id = r.device_id
-                WHERE d.device_type LIKE %s
-                ORDER BY d.device_id DESC
-            """, ('%' + search_type + '%',))
-        else:
-            cursor.execute("""
-                SELECT d.device_id, d.device_type, d.device_price, d.stock_quantity,
-                       r.borrow_time, r.return_time
-                FROM device d
-                LEFT JOIN device_record r ON d.device_id = r.device_id
-                ORDER BY d.device_id DESC
-            """)
+            sql += " AND device_type LIKE %s"
+            params.append('%' + search_type + '%')
+        if search_model:
+            sql += " AND device_model LIKE %s"
+            params.append('%' + search_model + '%')
+        sql += " ORDER BY device_id DESC"
+        cursor.execute(sql, params)
         devices = cursor.fetchall()
     db.close()
     return render_template('admin.html', username=session['username'], devices=devices, add_msg=add_msg, stat_result=None)
-
 # 添加设备及入库
 @app.route('/add_device', methods=['POST'])
 def add_device():
     if 'username' not in session or session.get('role') != 'admin':
         return redirect(url_for('login'))
     device_type = request.form['device_type']
+    device_model = request.form['device_model']
     device_price = request.form['device_price']
     stock_quantity = request.form['stock_quantity']
     db = get_db()
     with db.cursor() as cursor:
         cursor.execute(
-            "INSERT INTO device (device_type, device_price, stock_in_time, stock_quantity) VALUES (%s, %s, NOW(), %s)",
-            (device_type, device_price, stock_quantity)
+            "INSERT INTO device (device_type, device_model, device_price, stock_in_time, stock_quantity) VALUES (%s, %s, %s, NOW(), %s)",
+            (device_type, device_model, device_price, stock_quantity)
         )
         db.commit()
     db.close()
     return redirect(url_for('admin_dashboard', add_msg='设备添加成功'))
+
+# 删除设备
+@app.route('/delete_device', methods=['POST'])
+def delete_device():
+    if 'username' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+    device_id = request.form.get('device_id')
+    if not device_id:
+        return redirect(url_for('admin_dashboard', add_msg='设备ID无效'))
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("DELETE FROM device_record WHERE device_id=%s", (device_id,))
+            cursor.execute("DELETE FROM device WHERE device_id=%s", (device_id,))
+            db.commit()
+    finally:
+        db.close()
+    return redirect(url_for('admin_dashboard', add_msg='设备删除成功'))
 
 # 统计借还数量
 @app.route('/device_stat')
@@ -144,20 +160,19 @@ def device_stat():
         db = get_db()
         with db.cursor() as cursor:
             cursor.execute("""
-                SELECT d.device_id, d.device_type,
+                SELECT d.device_id, d.device_type, d.device_model,
                     SUM(CASE WHEN r.borrow_time BETWEEN %s AND %s THEN 1 ELSE 0 END) AS borrow_count,
                     SUM(CASE WHEN r.return_time BETWEEN %s AND %s THEN 1 ELSE 0 END) AS return_count
                 FROM device d
                 LEFT JOIN device_record r ON d.device_id = r.device_id
-                GROUP BY d.device_id, d.device_type
+                GROUP BY d.device_id, d.device_type, d.device_model
             """, (start_time, end_time, start_time, end_time))
             stat_result = cursor.fetchall()
         db.close()
-    # 设备列表也要查出来
     db = get_db()
     with db.cursor() as cursor:
         cursor.execute("""
-            SELECT d.device_id, d.device_type, d.device_price, d.stock_quantity,
+            SELECT d.device_id, d.device_type, d.device_model, d.device_price, d.stock_quantity,
                    r.borrow_time, r.return_time
             FROM device d
             LEFT JOIN device_record r ON d.device_id = r.device_id
@@ -173,15 +188,21 @@ def user_dashboard():
     if 'username' not in session or session.get('role') != 'user':
         return redirect(url_for('login'))
     search_type = request.args.get('search_type')
+    search_model = request.args.get('search_model')
     borrow_msg = request.args.get('borrow_msg')
     return_msg = request.args.get('return_msg')
     db = get_db()
     try:
         with db.cursor() as cursor:
+            sql = "SELECT * FROM device WHERE 1=1"
+            params = []
             if search_type:
-                cursor.execute("SELECT * FROM device WHERE device_type LIKE %s", ('%' + search_type + '%',))
-            else:
-                cursor.execute("SELECT * FROM device")
+                sql += " AND device_type LIKE %s"
+                params.append('%' + search_type + '%')
+            if search_model:
+                sql += " AND device_model LIKE %s"
+                params.append('%' + search_model + '%')
+            cursor.execute(sql, params)
             devices = cursor.fetchall()
     finally:
         db.close()
@@ -210,7 +231,6 @@ def borrow_device():
             device = cursor.fetchone()
             if not device or device['stock_quantity'] < borrow_count:
                 return redirect(url_for('user_dashboard', borrow_msg="库存不足或设备不存在"))
-            # 插入多条借用记录
             for _ in range(borrow_count):
                 cursor.execute("INSERT INTO device_record (device_id, user_id, borrow_time) VALUES (%s, %s, NOW())", (device_id, user['id']))
             db.commit()
@@ -239,7 +259,6 @@ def return_device():
             user = cursor.fetchone()
             if not user:
                 return redirect(url_for('user_dashboard', return_msg="用户不存在"))
-            # 查询该用户未归还的该设备的借用记录
             cursor.execute("""
                 SELECT record_id FROM device_record
                 WHERE device_id=%s AND user_id=%s AND return_time IS NULL
@@ -249,7 +268,6 @@ def return_device():
             records = cursor.fetchall()
             if not records or len(records) < return_count:
                 return redirect(url_for('user_dashboard', return_msg="归还数量超过可归还数量"))
-            # 批量归还
             record_ids = [r['record_id'] for r in records]
             if record_ids:
                 format_strings = ','.join(['%s'] * len(record_ids))
